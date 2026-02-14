@@ -25,7 +25,11 @@
 		AA000049 /* Magazine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000050 /* Magazine.swift */; };
 		AA000051 /* MagazineService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000052 /* MagazineService.swift */; };
 		AA000053 /* ArticleDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000054 /* ArticleDetailView.swift */; };
+		AA000055 /* Video.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000056 /* Video.swift */; };
+		AA000057 /* VideoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000058 /* VideoService.swift */; };
+		AA000059 /* YouTubePlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000060 /* YouTubePlayerView.swift */; };
 		C32FE0A02EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf in Resources */ = {isa = PBXBuildFile; fileRef = C32FE09F2EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf */; };
+		C384EE092F412AE50044D1BA /* AgriTVView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C384EE082F412AE50044D1BA /* AgriTVView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -49,7 +53,11 @@
 		AA000050 /* Magazine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Magazine.swift; sourceTree = "<group>"; };
 		AA000052 /* MagazineService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MagazineService.swift; sourceTree = "<group>"; };
 		AA000054 /* ArticleDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleDetailView.swift; sourceTree = "<group>"; };
+		AA000056 /* Video.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Video.swift; sourceTree = "<group>"; };
+		AA000058 /* VideoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoService.swift; sourceTree = "<group>"; };
+		AA000060 /* YouTubePlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YouTubePlayerView.swift; sourceTree = "<group>"; };
 		C32FE09F2EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "ISSUE-29-NOV-2025-compressed.pdf"; sourceTree = "<group>"; };
+		C384EE082F412AE50044D1BA /* AgriTVView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AgriTVView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +103,7 @@
 		AA000019 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				C384EE082F412AE50044D1BA /* AgriTVView.swift */,
 				AA000004 /* ContentView.swift */,
 				AA000036 /* HomeView.swift */,
 				AA000038 /* NewsPageView.swift */,
@@ -104,6 +113,7 @@
 				AA000008 /* SafariView.swift */,
 				AA000034 /* RefreshableWebView.swift */,
 				AA000054 /* ArticleDetailView.swift */,
+				AA000060 /* YouTubePlayerView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -118,6 +128,8 @@
 				AA000046 /* BookmarkManager.swift */,
 				AA000050 /* Magazine.swift */,
 				AA000052 /* MagazineService.swift */,
+				AA000056 /* Video.swift */,
+				AA000058 /* VideoService.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -217,6 +229,10 @@
 				AA000051 /* MagazineService.swift in Sources */,
 				AA000031 /* TabViewModel.swift in Sources */,
 				AA000053 /* ArticleDetailView.swift in Sources */,
+				AA000055 /* Video.swift in Sources */,
+				AA000057 /* VideoService.swift in Sources */,
+				AA000059 /* YouTubePlayerView.swift in Sources */,
+				C384EE092F412AE50044D1BA /* AgriTVView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

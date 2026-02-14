@@ -49,11 +49,11 @@ struct ContentView: View {
             }
             .tag(2)
             
-            BookmarksView()
+            AgriTVView()
             .tabItem {
                 VStack {
-                    Image(systemName: "bookmark.fill")
-                    Text("Saved")
+                    Image(systemName: "play.tv.fill")
+                    Text("Agri-TV")
                 }
             }
             .tag(3)

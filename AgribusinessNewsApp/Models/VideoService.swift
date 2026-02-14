@@ -22,8 +22,8 @@ class VideoService: ObservableObject {
         }
         
         do {
-            // Fetch from WordPress custom post type with embedded data
-            guard let url = URL(string: "\(baseURL)?per_page=50&orderby=date&order=desc&_embed=true") else {
+            // Fetch from WordPress custom post type
+            guard let url = URL(string: "\(baseURL)?per_page=50&orderby=date&order=desc") else {
                 throw URLError(.badURL)
             }
             
@@ -32,21 +32,20 @@ class VideoService: ObservableObject {
             
             // Transform posts to videos
             let transformedVideos = posts.compactMap { post -> Video? in
-                let youtubeUrl = extractYouTubeUrl(from: post)
-                guard !youtubeUrl.isEmpty else { return nil }
-                
-                // Extract featured image
-                var thumbnailUrl: String? = nil
-                if let featured = post._embedded?.wpFeaturedmedia?.first {
-                    thumbnailUrl = featured.source_url
+                // Get YouTube URL from ACF field
+                guard let youtubeUrl = post.acf?.youtube_url, !youtubeUrl.isEmpty else {
+                    return nil
                 }
+                
+                // Get description from ACF field
+                let description = post.acf?.description ?? ""
                 
                 return Video(
                     id: post.id,
                     title: cleanHTML(post.title.rendered),
-                    description: cleanHTML(post.excerpt.rendered),
+                    description: cleanHTML(description),
                     youtubeUrl: youtubeUrl,
-                    thumbnailUrl: thumbnailUrl,
+                    thumbnailUrl: nil,
                     publishedDate: post.date,
                     webUrl: post.link
                 )
@@ -67,40 +66,6 @@ class VideoService: ObservableObject {
         }
     }
     
-    private func extractYouTubeUrl(from post: AgriTVPost) -> String {
-        let content = post.content.rendered
-        
-        // Look for YouTube URLs in various formats
-        let patterns = [
-            "https?://(?:www\\.)?youtube\\.com/watch\\?v=[a-zA-Z0-9_-]+",
-            "https?://(?:www\\.)?youtu\\.be/[a-zA-Z0-9_-]+",
-            "https?://(?:www\\.)?youtube\\.com/embed/[a-zA-Z0-9_-]+",
-            "src=[\"']?(https?://(?:www\\.)?youtube\\.com/embed/[a-zA-Z0-9_-]+)[\"']?"
-        ]
-        
-        for pattern in patterns {
-            if let range = content.range(of: pattern, options: [.regularExpression, .caseInsensitive]) {
-                var url = String(content[range])
-                // Clean up if it starts with src=
-                if url.hasPrefix("src=") {
-                    url = url.replacingOccurrences(of: "src=[\"']?", with: "", options: .regularExpression)
-                    url = url.replacingOccurrences(of: "[\"']$", with: "", options: .regularExpression)
-                }
-                return url
-            }
-        }
-        
-        // Also check excerpt
-        let excerpt = post.excerpt.rendered
-        for pattern in patterns {
-            if let range = excerpt.range(of: pattern, options: [.regularExpression, .caseInsensitive]) {
-                return String(excerpt[range])
-            }
-        }
-        
-        return ""
-    }
-    
     private func cleanHTML(_ html: String) -> String {
         html.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
             .replacingOccurrences(of: "&#8211;", with: "–")
@@ -119,20 +84,11 @@ struct AgriTVPost: Codable {
     let date: String
     let link: String
     let title: AgriTVTitle
-    let excerpt: AgriTVExcerpt
     let content: AgriTVContent
-    let _embedded: AgriTVEmbedded?
-    
-    enum CodingKeys: String, CodingKey {
-        case id, date, link, title, excerpt, content, _embedded
-    }
+    let acf: AgriTVACF?
 }
 
 struct AgriTVTitle: Codable {
-    let rendered: String
-}
-
-struct AgriTVExcerpt: Codable {
     let rendered: String
 }
 
@@ -140,14 +96,7 @@ struct AgriTVContent: Codable {
     let rendered: String
 }
 
-struct AgriTVEmbedded: Codable {
-    let wpFeaturedmedia: [AgriTVMedia]?
-    
-    enum CodingKeys: String, CodingKey {
-        case wpFeaturedmedia = "wp:featuredmedia"
-    }
-}
-
-struct AgriTVMedia: Codable {
-    let source_url: String?
+struct AgriTVACF: Codable {
+    let youtube_url: String?
+    let description: String?
 }

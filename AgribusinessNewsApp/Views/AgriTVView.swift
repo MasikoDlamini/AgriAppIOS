@@ -55,7 +55,7 @@ struct AgriTVView: View {
                         // Video List
                         LazyVStack(spacing: 16) {
                             ForEach(videoService.videos) { video in
-                                NavigationLink(destination: SafariView(url: URL(string: video.webUrl)!)) {
+                                NavigationLink(destination: YouTubePlayerView(video: video)) {
                                     VideoCardView(video: video)
                                 }
                             }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Video: Codable, Identifiable {
+struct Video: Codable, Identifiable, Hashable {
     let id: Int
     let title: String
     let description: String
@@ -15,6 +15,15 @@ struct Video: Codable, Identifiable {
     let thumbnailUrl: String?
     let publishedDate: String
     let webUrl: String
+    
+    // Hashable conformance
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: Video, rhs: Video) -> Bool {
+        lhs.id == rhs.id
+    }
     
     var youtubeVideoId: String? {
         // Extract video ID from various YouTube URL formats
