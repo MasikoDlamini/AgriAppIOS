@@ -13,6 +13,7 @@ struct NewsPageView: View {
     @StateObject private var bookmarkManager = BookmarkManager.shared
     @State private var searchText = ""
     @State private var showingBookmarks = false
+    @State private var selectedArticle: NewsArticleModel?
     
     var filteredArticles: [NewsArticleModel] {
         if searchText.isEmpty {
@@ -26,87 +27,88 @@ struct NewsPageView: View {
     }
     
     var body: some View {
-        ZStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    // Header with Search
-                    NewsHeaderWithSearch(
-                        searchText: $searchText,
-                        onRefresh: {
-                            Task {
-                                try? await newsService.fetchNews()
+        NavigationStack {
+            ZStack {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        // Header with Search
+                        NewsHeaderWithSearch(
+                            searchText: $searchText,
+                            onRefresh: {
+                                Task {
+                                    try? await newsService.fetchNews()
+                                }
                             }
-                        }
-                    )
-                    
-                    if newsService.isLoading && newsService.articles.isEmpty {
-                        // Loading state
-                        ProgressView("Loading news...")
-                            .padding(40)
-                    } else if let error = newsService.error {
-                        // Error state
-                        ErrorView(message: error, onRetry: {
-                            Task {
-                                try? await newsService.fetchNews()
+                        )
+                        
+                        if newsService.isLoading && newsService.articles.isEmpty {
+                            // Loading state
+                            ProgressView("Loading news...")
+                                .padding(40)
+                        } else if let error = newsService.error {
+                            // Error state
+                            ErrorView(message: error, onRetry: {
+                                Task {
+                                    try? await newsService.fetchNews()
+                                }
+                            })
+                        } else if filteredArticles.isEmpty {
+                            // Empty state
+                            if searchText.isEmpty {
+                                EmptyNewsView()
+                            } else {
+                                SearchEmptyView(searchText: searchText)
                             }
-                        })
-                    } else if filteredArticles.isEmpty {
-                        // Empty state
-                        if searchText.isEmpty {
-                            EmptyNewsView()
                         } else {
-                            SearchEmptyView(searchText: searchText)
-                        }
-                    } else {
-                        // News articles with bookmark & share
-                        LazyVStack(spacing: 16) {
-                            ForEach(filteredArticles) { article in
-                                NewsArticleCardWithActions(
-                                    article: article,
-                                    isBookmarked: bookmarkManager.isBookmarked(article),
-                                    onTap: {
-                                        if let url = URL(string: article.link) {
-                                            Task { @MainActor in
-                                                UIApplication.shared.open(url)
+                            // News articles with bookmark & share
+                            LazyVStack(spacing: 16) {
+                                ForEach(filteredArticles) { article in
+                                    NavigationLink(value: article) {
+                                        NewsArticleCardWithActions(
+                                            article: article,
+                                            isBookmarked: bookmarkManager.isBookmarked(article),
+                                            onTap: {},
+                                            onBookmark: {
+                                                bookmarkManager.toggleBookmark(article)
+                                            },
+                                            onShare: {
+                                                shareArticle(article)
                                             }
-                                        }
-                                    },
-                                    onBookmark: {
-                                        bookmarkManager.toggleBookmark(article)
-                                    },
-                                    onShare: {
-                                        shareArticle(article)
+                                        )
                                     }
-                                )
+                                }
                             }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
                     }
                 }
-            }
-            .refreshable {
-                try? await newsService.fetchNews()
-            }
-            
-            // Loading overlay when refreshing
-            if newsService.isLoading && !newsService.articles.isEmpty {
-                VStack {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                        .padding(8)
-                        .background(Color(.systemBackground))
-                        .cornerRadius(8)
-                        .shadow(radius: 4)
+                .refreshable {
+                    try? await newsService.fetchNews()
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .padding(.top, 80)
+                
+                // Loading overlay when refreshing
+                if newsService.isLoading && !newsService.articles.isEmpty {
+                    VStack {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                            .padding(8)
+                            .background(Color(.systemBackground))
+                            .cornerRadius(8)
+                            .shadow(radius: 4)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .padding(.top, 80)
+                }
             }
-        }
-        .background(Color(.systemGroupedBackground))
-        .task {
-            if newsService.articles.isEmpty {
-                try? await newsService.fetchNews()
+            .background(Color(.systemGroupedBackground))
+            .navigationDestination(for: NewsArticleModel.self) { article in
+                ArticleDetailView(article: article)
+            }
+            .task {
+                if newsService.articles.isEmpty {
+                    try? await newsService.fetchNews()
+                }
             }
         }
     }
@@ -212,10 +214,7 @@ struct NewsArticleCardWithActions: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            Button(action: onTap) {
-                NewsArticleCardContent(article: article)
-            }
-            .buttonStyle(.plain)
+            NewsArticleCardContent(article: article)
             
             Divider()
             

@@ -13,7 +13,7 @@ struct NewsResponse: Codable {
     let articles: [NewsArticleModel]
 }
 
-struct NewsArticleModel: Codable, Identifiable, Equatable {
+struct NewsArticleModel: Codable, Identifiable, Equatable, Hashable {
     let id: Int
     let title: String
     let link: String
@@ -22,8 +22,13 @@ struct NewsArticleModel: Codable, Identifiable, Equatable {
     let category: String
     let date: String
     let timestamp: String
+    let content: String
     
     static func == (lhs: NewsArticleModel, rhs: NewsArticleModel) -> Bool {
         lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }

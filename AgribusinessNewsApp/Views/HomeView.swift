@@ -15,56 +15,80 @@ struct HomeView: View {
     @StateObject private var newsService = NewsService()
     @StateObject private var bookmarkManager = BookmarkManager.shared
     @State private var latestNews: [NewsArticleModel] = []
+    @State private var selectedArticle: NewsArticleModel?
+    
+    var featuredArticles: [NewsArticleModel] {
+        Array(latestNews.prefix(5))
+    }
+    
+    var remainingArticles: [NewsArticleModel] {
+        Array(latestNews.dropFirst(5))
+    }
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                // Header with Logo
-                HeaderView()
-                
-                // Featured Article
-                FeaturedArticleView(onTap: {
-                    selectedURL = "https://agribusinessmedia.com"
-                    showWebView = true
-                })
-                
-                // Quick Categories
-                CategoriesGridView(
-                    onCategoryTap: { category in
-                        switch category {
-                        case "News":
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Header with Logo
+                    HeaderView()
+                    
+                    // Featured Slideshow
+                    if !featuredArticles.isEmpty {
+                        FeaturedArticleSlideshow(
+                            articles: featuredArticles,
+                            onArticleTap: { article in
+                                selectedArticle = article
+                            }
+                        )
+                    } else {
+                        FeaturedArticleSlideshow(
+                            articles: [],
+                            onArticleTap: { _ in
+                                selectedURL = "https://agribusinessmedia.com"
+                                showWebView = true
+                            }
+                        )
+                    }
+                    
+                    // Quick Categories
+                    CategoriesGridView(
+                        onCategoryTap: { category in
+                            switch category {
+                            case "News":
+                                selectedTab = 1
+                            case "Magazines":
+                                selectedTab = 2
+                            case "Videos":
+                                selectedURL = "https://agribusinessmedia.com/agri-tv"
+                                showWebView = true
+                            default:
+                                selectedURL = "https://agribusinessmedia.com"
+                                showWebView = true
+                            }
+                        }
+                    )
+                    
+                    // Latest News Section
+                    LatestNewsSection(
+                        articles: remainingArticles,
+                        onArticleTap: { article in
+                            selectedArticle = article
+                        },
+                        onViewAllTap: {
                             selectedTab = 1
-                        case "Magazines":
-                            selectedTab = 2
-                        case "Videos":
-                            selectedURL = "https://agribusinessmedia.com/agri-tv"
-                            showWebView = true
-                        default:
-                            selectedURL = "https://agribusinessmedia.com"
-                            showWebView = true
                         }
-                    }
-                )
-                
-                // Latest News Section
-                LatestNewsSection(
-                    articles: latestNews,
-                    onArticleTap: { url in
-                        if let articleURL = URL(string: url) {
-                            UIApplication.shared.open(articleURL)
-                        }
-                    },
-                    onViewAllTap: {
-                        selectedTab = 1
-                    }
-                )
-                
-                Spacer(minLength: 20)
+                    )
+                    
+                    Spacer(minLength: 20)
+                }
             }
-        }
-        .background(Color(.systemGroupedBackground))
-        .task {
-            await loadLatestNews()
+            .background(Color(.systemGroupedBackground))
+            .navigationDestination(item: $selectedArticle) { article in
+                ArticleDetailView(article: article)
+            }
+            .task {
+                await loadLatestNews()
+            }
         }
         .fullScreenCover(isPresented: $showWebView) {
             WebViewModal(url: selectedURL, isPresented: $showWebView, webViewModel: webViewModel)
@@ -73,7 +97,7 @@ struct HomeView: View {
     
     private func loadLatestNews() async {
         if let allNews = try? await newsService.fetchNews() {
-            latestNews = Array(allNews.prefix(2))
+            latestNews = Array(allNews.prefix(11))
         }
     }
 }
@@ -98,14 +122,115 @@ struct HeaderView: View {
     }
 }
 
-// MARK: - Featured Article
-struct FeaturedArticleView: View {
-    let onTap: () -> Void
+// MARK: - Featured Article Slideshow
+struct FeaturedArticleSlideshow: View {
+    let articles: [NewsArticleModel]
+    let onArticleTap: (NewsArticleModel) -> Void
+    
+    @State private var currentIndex = 0
+    @State private var timer: Timer?
     
     var body: some View {
-        Button(action: onTap) {
-            ZStack(alignment: .bottomLeading) {
-                // Background image with overlay
+        VStack(spacing: 0) {
+            if !articles.isEmpty {
+                ZStack(alignment: .bottomLeading) {
+                    // Background image with overlay
+                    if let imageURL = articles[currentIndex].image {
+                        AsyncImage(url: URL(string: imageURL)) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(height: 200)
+                                    .clipped()
+                                    .overlay(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                Color.black.opacity(0.3),
+                                                Color.black.opacity(0.7)
+                                            ]),
+                                            startPoint: .top,
+                                            endPoint: .bottom
+                                        )
+                                    )
+                            case .failure(_):
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.green.opacity(0.7), Color.green.opacity(0.9)]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                                .frame(height: 200)
+                            case .empty:
+                                Color.gray.opacity(0.3)
+                                    .frame(height: 200)
+                            @unknown default:
+                                Color.gray.opacity(0.3)
+                                    .frame(height: 200)
+                            }
+                        }
+                    } else {
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.green.opacity(0.7), Color.green.opacity(0.9)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        .frame(height: 200)
+                    }
+                    
+                    // Content
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Text("FEATURED")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.white.opacity(0.3))
+                                .cornerRadius(4)
+                            Spacer()
+                            Image(systemName: "arrow.right.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.white)
+                        }
+                        
+                        Spacer()
+                        
+                        Text(articles[currentIndex].title)
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+                            .shadow(color: Color.black.opacity(0.5), radius: 3, x: 0, y: 2)
+                        
+                        Text(articles[currentIndex].excerpt)
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.9))
+                            .lineLimit(1)
+                            .shadow(color: Color.black.opacity(0.5), radius: 3, x: 0, y: 2)
+                    }
+                    .padding(20)
+                }
+                .frame(height: 200)
+                .onTapGesture {
+                    onArticleTap(articles[currentIndex])
+                }
+                
+                // Pagination dots
+                HStack(spacing: 8) {
+                    ForEach(0..<articles.count, id: \.self) { index in
+                        Circle()
+                            .fill(index == currentIndex ? Color.green : Color.gray.opacity(0.5))
+                            .frame(width: 6, height: 6)
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(Color(.systemBackground))
+            } else {
+                // Placeholder when no articles
                 AsyncImage(url: URL(string: "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800&q=80")) { phase in
                     switch phase {
                     case .success(let image):
@@ -125,7 +250,6 @@ struct FeaturedArticleView: View {
                                 )
                             )
                     case .failure(_):
-                        // Fallback gradient
                         LinearGradient(
                             gradient: Gradient(colors: [Color.green.opacity(0.7), Color.green.opacity(0.9)]),
                             startPoint: .topLeading,
@@ -141,43 +265,34 @@ struct FeaturedArticleView: View {
                     }
                 }
                 
-                // Content
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        Text("FEATURED")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Color.white.opacity(0.3))
-                            .cornerRadius(4)
-                        Spacer()
-                        Image(systemName: "arrow.right.circle.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(.white)
-                    }
-                    
+                HStack(spacing: 8) {
                     Spacer()
-                    
-                    Text("Explore Today's Top Agricultural Stories")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .lineLimit(2)
-                        .shadow(color: Color.black.opacity(0.5), radius: 3, x: 0, y: 2)
-                    
-                    Text("Stay informed with the latest in agribusiness")
-                        .font(.subheadline)
-                        .foregroundColor(.white)
-                        .shadow(color: Color.black.opacity(0.5), radius: 3, x: 0, y: 2)
                 }
-                .padding(20)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(Color(.systemBackground))
             }
         }
-        .frame(height: 200)
-        .cornerRadius(0)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .onAppear {
+            startAutoRotation()
+        }
+        .onDisappear {
+            stopAutoRotation()
+        }
+    }
+    
+    private func startAutoRotation() {
+        guard !articles.isEmpty else { return }
+        timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
+            withAnimation(.easeInOut(duration: 0.5)) {
+                currentIndex = (currentIndex + 1) % articles.count
+            }
+        }
+    }
+    
+    private func stopAutoRotation() {
+        timer?.invalidate()
+        timer = nil
     }
 }
 
@@ -260,7 +375,7 @@ struct SectionHeaderView: View {
 // MARK: - Latest News Section
 struct LatestNewsSection: View {
     let articles: [NewsArticleModel]
-    let onArticleTap: (String) -> Void
+    let onArticleTap: (NewsArticleModel) -> Void
     let onViewAllTap: () -> Void
     
     var body: some View {
@@ -305,7 +420,7 @@ struct LatestNewsSection: View {
                 VStack(spacing: 12) {
                     ForEach(articles) { article in
                         Button(action: {
-                            onArticleTap(article.link)
+                            onArticleTap(article)
                         }) {
                             HStack(spacing: 12) {
                                 // Thumbnail

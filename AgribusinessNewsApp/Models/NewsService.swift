@@ -60,7 +60,8 @@ class NewsService: ObservableObject {
                     image: imageURL,
                     category: category,
                     date: dateString,
-                    timestamp: post.date
+                    timestamp: post.date,
+                    content: cleanHTML(post.content.rendered)
                 )
             }
             
@@ -115,10 +116,11 @@ struct WordPressPost: Codable {
     let link: String
     let title: WordPressTitle
     let excerpt: WordPressExcerpt
+    let content: WordPressContent
     let _embedded: WordPressEmbedded?
     
     enum CodingKeys: String, CodingKey {
-        case id, date, link, title, excerpt, _embedded
+        case id, date, link, title, excerpt, content, _embedded
     }
 }
 
@@ -127,6 +129,10 @@ struct WordPressTitle: Codable {
 }
 
 struct WordPressExcerpt: Codable {
+    let rendered: String
+}
+
+struct WordPressContent: Codable {
     let rendered: String
 }
 
