@@ -770,8 +770,7 @@ struct CategoriesGridView: View {
     let categories = [
         CategoryItem(icon: "newspaper.fill", title: "News", color: .blue),
         CategoryItem(icon: "book.fill", title: "Magazines", color: .orange),
-        CategoryItem(icon: "video.fill", title: "Videos", color: .red),
-        CategoryItem(icon: "chart.line.uptrend.xyaxis", title: "Markets", color: .green)
+        CategoryItem(icon: "video.fill", title: "Videos", color: .red)
     ]
     
     var body: some View {
