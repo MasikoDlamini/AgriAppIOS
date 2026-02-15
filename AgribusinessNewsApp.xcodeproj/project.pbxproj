@@ -28,6 +28,11 @@
 		AA000055 /* Video.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000056 /* Video.swift */; };
 		AA000057 /* VideoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000058 /* VideoService.swift */; };
 		AA000059 /* YouTubePlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000060 /* YouTubePlayerView.swift */; };
+		AA000061 /* SkeletonLoaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000062 /* SkeletonLoaders.swift */; };
+		AA000063 /* CategoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000064 /* CategoryService.swift */; };
+		AA000065 /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000066 /* SideMenuView.swift */; };
+		AA000067 /* TeamMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000068 /* TeamMember.swift */; };
+		AA000069 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000070 /* AboutView.swift */; };
 		C32FE0A02EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf in Resources */ = {isa = PBXBuildFile; fileRef = C32FE09F2EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf */; };
 		C384EE092F412AE50044D1BA /* AgriTVView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C384EE082F412AE50044D1BA /* AgriTVView.swift */; };
 /* End PBXBuildFile section */
@@ -56,6 +61,11 @@
 		AA000056 /* Video.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Video.swift; sourceTree = "<group>"; };
 		AA000058 /* VideoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoService.swift; sourceTree = "<group>"; };
 		AA000060 /* YouTubePlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YouTubePlayerView.swift; sourceTree = "<group>"; };
+		AA000062 /* SkeletonLoaders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonLoaders.swift; sourceTree = "<group>"; };
+		AA000064 /* CategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryService.swift; sourceTree = "<group>"; };
+		AA000066 /* SideMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuView.swift; sourceTree = "<group>"; };
+		AA000068 /* TeamMember.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamMember.swift; sourceTree = "<group>"; };
+		AA000070 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		C32FE09F2EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "ISSUE-29-NOV-2025-compressed.pdf"; sourceTree = "<group>"; };
 		C384EE082F412AE50044D1BA /* AgriTVView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AgriTVView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -114,6 +124,9 @@
 				AA000034 /* RefreshableWebView.swift */,
 				AA000054 /* ArticleDetailView.swift */,
 				AA000060 /* YouTubePlayerView.swift */,
+				AA000062 /* SkeletonLoaders.swift */,
+				AA000066 /* SideMenuView.swift */,
+				AA000070 /* AboutView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -130,6 +143,8 @@
 				AA000052 /* MagazineService.swift */,
 				AA000056 /* Video.swift */,
 				AA000058 /* VideoService.swift */,
+				AA000064 /* CategoryService.swift */,
+				AA000068 /* TeamMember.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -232,6 +247,11 @@
 				AA000055 /* Video.swift in Sources */,
 				AA000057 /* VideoService.swift in Sources */,
 				AA000059 /* YouTubePlayerView.swift in Sources */,
+				AA000061 /* SkeletonLoaders.swift in Sources */,
+				AA000063 /* CategoryService.swift in Sources */,
+				AA000065 /* SideMenuView.swift in Sources */,
+				AA000067 /* TeamMember.swift in Sources */,
+				AA000069 /* AboutView.swift in Sources */,
 				C384EE092F412AE50044D1BA /* AgriTVView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

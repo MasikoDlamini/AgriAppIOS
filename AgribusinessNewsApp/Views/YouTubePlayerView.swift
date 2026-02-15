@@ -15,7 +15,8 @@ struct YouTubePlayerView: View {
         if let videoId = video.youtubeVideoId {
             return URL(string: "https://www.youtube.com/watch?v=\(videoId)")
         }
-        return URL(string: video.youtubeUrl)
+        // Fallback to sanitized URL
+        return URL(string: video.sanitizedYoutubeUrl)
     }
     
     var body: some View {

@@ -239,15 +239,7 @@ struct MagazineCoverViewDynamic: View {
 // MARK: - Loading State
 struct LoadingMagazinesView: View {
     var body: some View {
-        VStack(spacing: 20) {
-            ProgressView()
-                .scaleEffect(1.5)
-            Text("Loading magazines...")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(60)
+        MagazineLoadingSkeleton()
     }
 }
 

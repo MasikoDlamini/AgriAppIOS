@@ -199,29 +199,7 @@ struct DefaultVideoThumbnail: View {
 // MARK: - Loading Videos View
 struct LoadingVideosView: View {
     var body: some View {
-        VStack(spacing: 20) {
-            ForEach(0..<3, id: \.self) { _ in
-                VStack(alignment: .leading, spacing: 0) {
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(height: 200)
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(height: 20)
-                        
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(width: 150, height: 14)
-                    }
-                    .padding(12)
-                }
-                .cornerRadius(12)
-            }
-        }
-        .padding(16)
-        .redacted(reason: .placeholder)
+        VideoLoadingSkeleton()
     }
 }
 

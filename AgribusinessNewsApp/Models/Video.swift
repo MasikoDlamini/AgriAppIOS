@@ -25,18 +25,24 @@ struct Video: Codable, Identifiable, Hashable {
         lhs.id == rhs.id
     }
     
+    // Sanitized URL with whitespace removed
+    var sanitizedYoutubeUrl: String {
+        youtubeUrl.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
     var youtubeVideoId: String? {
         // Extract video ID from various YouTube URL formats
+        let url = sanitizedYoutubeUrl
         let patterns = [
-            "(?:youtube\\.com/watch\\?v=|youtu\\.be/|youtube\\.com/embed/)([a-zA-Z0-9_-]{11})",
-            "youtube\\.com/watch\\?.*v=([a-zA-Z0-9_-]{11})"
+            "(?:(?:www\\.)?youtube\\.com/watch\\?v=|youtu\\.be/|(?:www\\.)?youtube\\.com/embed/)([a-zA-Z0-9_-]{11})",
+            "(?:www\\.)?youtube\\.com/watch\\?.*v=([a-zA-Z0-9_-]{11})"
         ]
         
         for pattern in patterns {
             if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
-               let match = regex.firstMatch(in: youtubeUrl, options: [], range: NSRange(youtubeUrl.startIndex..., in: youtubeUrl)),
-               let range = Range(match.range(at: 1), in: youtubeUrl) {
-                return String(youtubeUrl[range])
+               let match = regex.firstMatch(in: url, options: [], range: NSRange(url.startIndex..., in: url)),
+               let range = Range(match.range(at: 1), in: url) {
+                return String(url[range])
             }
         }
         return nil

@@ -80,6 +80,67 @@ class NewsService: ObservableObject {
         }
     }
     
+    func fetchNewsByCategory(_ categoryId: Int) async throws -> [NewsArticleModel] {
+        await MainActor.run {
+            isLoading = true
+            error = nil
+        }
+        
+        guard let url = URL(string: "\(baseURL)?per_page=20&categories=\(categoryId)&_embed=true") else {
+            await MainActor.run {
+                error = "Invalid URL"
+                isLoading = false
+            }
+            throw URLError(.badURL)
+        }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let posts = try JSONDecoder().decode([WordPressPost].self, from: data)
+            
+            let transformedArticles = posts.map { post -> NewsArticleModel in
+                var imageURL: String? = nil
+                if let embedded = post._embedded,
+                   let media = embedded.wpFeaturedmedia?.first {
+                    imageURL = media.source_url
+                }
+                
+                var category = "News"
+                if let embedded = post._embedded,
+                   let terms = embedded.wpTerm?.first?.first {
+                    category = terms.name ?? "News"
+                }
+                
+                let dateString = formatDate(post.date)
+                
+                return NewsArticleModel(
+                    id: post.id,
+                    title: cleanHTML(post.title.rendered),
+                    link: post.link,
+                    excerpt: cleanHTML(post.excerpt.rendered).prefix(150).trimmingCharacters(in: .whitespacesAndNewlines) + "",
+                    image: imageURL,
+                    category: category,
+                    date: dateString,
+                    timestamp: post.date,
+                    content: cleanHTML(post.content.rendered)
+                )
+            }
+            
+            await MainActor.run {
+                self.articles = transformedArticles
+                self.isLoading = false
+            }
+            
+            return transformedArticles
+        } catch {
+            await MainActor.run {
+                self.error = "Failed to load news: \(error.localizedDescription)"
+                self.isLoading = false
+            }
+            throw error
+        }
+    }
+    
     private func cleanHTML(_ html: String) -> String {
         html.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
             .replacingOccurrences(of: "&#8211;", with: "–")

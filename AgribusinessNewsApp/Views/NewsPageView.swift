@@ -42,9 +42,8 @@ struct NewsPageView: View {
                         )
                         
                         if newsService.isLoading && newsService.articles.isEmpty {
-                            // Loading state
-                            ProgressView("Loading news...")
-                                .padding(40)
+                            // Loading state with skeleton
+                            NewsLoadingSkeleton()
                         } else if let error = newsService.error {
                             // Error state
                             ErrorView(message: error, onRetry: {
@@ -83,6 +82,7 @@ struct NewsPageView: View {
                         }
                     }
                 }
+                .scrollDismissesKeyboard(.interactively)
                 .refreshable {
                     try? await newsService.fetchNews()
                 }
@@ -99,6 +99,7 @@ struct NewsPageView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .padding(.top, 80)
+                    .allowsHitTesting(false)
                 }
             }
             .background(Color(.systemGroupedBackground))
@@ -162,6 +163,9 @@ struct NewsHeaderWithSearch: View {
                     .foregroundColor(.secondary)
                 TextField("Search news...", text: $searchText)
                     .textFieldStyle(.plain)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .submitLabel(.search)
                 
                 if !searchText.isEmpty {
                     Button(action: {
@@ -177,6 +181,7 @@ struct NewsHeaderWithSearch: View {
             .cornerRadius(10)
             .padding(.horizontal, 20)
             .padding(.bottom, 12)
+            .contentShape(Rectangle())
         }
         .background(Color(.systemBackground))
     }
