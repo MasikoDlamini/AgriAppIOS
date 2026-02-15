@@ -78,6 +78,7 @@ struct MagazinesView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
 }
 

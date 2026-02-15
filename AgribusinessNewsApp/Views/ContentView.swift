@@ -20,6 +20,7 @@ struct ContentView: View {
                 )
                 .navigationBarHidden(true)
             }
+            .navigationViewStyle(.stack)
             .tabItem {
                 VStack {
                     Image(systemName: "house.fill")
@@ -32,6 +33,7 @@ struct ContentView: View {
                 NewsPageView(webViewModel: tabViewModel.newsWebViewModel)
                     .navigationBarHidden(true)
             }
+            .navigationViewStyle(.stack)
             .tabItem {
                 VStack {
                     Image(systemName: "newspaper.fill")
@@ -93,6 +95,7 @@ struct WebTabView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
 }
 

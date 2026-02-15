@@ -75,6 +75,7 @@ struct AgriTVView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
 }
 
