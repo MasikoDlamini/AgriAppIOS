@@ -12,7 +12,7 @@ class MagazineService: ObservableObject {
     @Published var isLoading = false
     @Published var error: String?
     
-    // WordPress Media API for PDFs
+    // WordPress Media API for PDFs and images
     private let baseURL = "https://agribusinessmedia.com/wp-json/wp/v2/media"
     
     func fetchMagazines() async throws -> [Magazine] {
@@ -22,7 +22,7 @@ class MagazineService: ObservableObject {
         }
         
         // Fetch PDF files from WordPress media library
-        guard let url = URL(string: "\(baseURL)?media_type=application&per_page=50&orderby=date&order=desc") else {
+        guard let pdfUrl = URL(string: "\(baseURL)?media_type=application&per_page=50&orderby=date&order=desc") else {
             await MainActor.run {
                 error = "Invalid URL"
                 isLoading = false
@@ -31,8 +31,8 @@ class MagazineService: ObservableObject {
         }
         
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let mediaItems = try JSONDecoder().decode([WordPressMediaItem].self, from: data)
+            let (pdfData, _) = try await URLSession.shared.data(from: pdfUrl)
+            let mediaItems = try JSONDecoder().decode([WordPressMediaItem].self, from: pdfData)
             
             // Filter for magazine PDFs only and transform
             let transformedMagazines = mediaItems.compactMap { item -> Magazine? in
@@ -55,13 +55,16 @@ class MagazineService: ObservableObject {
                 let cleanTitle = cleanHTML(item.title.rendered)
                 let (issueNumber, monthYear) = extractIssueInfo(from: cleanTitle, url: item.source_url)
                 
+                // Get cover image from PDF's auto-generated thumbnail
+                let coverImageUrl = extractCoverImageUrl(from: item.media_details)
+                
                 return Magazine(
                     id: item.id,
                     title: cleanTitle,
                     issueNumber: issueNumber,
                     monthYear: monthYear,
                     pdfUrl: item.source_url,
-                    coverImageUrl: nil,
+                    coverImageUrl: coverImageUrl,
                     publishedDate: item.date
                 )
             }
@@ -147,5 +150,24 @@ class MagazineService: ObservableObject {
         }
         
         return (issueNumber, monthYear)
+    }
+    
+    private func extractCoverImageUrl(from mediaDetails: WordPressMediaDetails?) -> String? {
+        guard let sizes = mediaDetails?.sizes else { return nil }
+        
+        // Prefer larger sizes for better quality cover images
+        if let large = sizes.large?.source_url {
+            return large
+        } else if let medium_large = sizes.medium_large?.source_url {
+            return medium_large
+        } else if let full = sizes.full?.source_url {
+            return full
+        } else if let medium = sizes.medium?.source_url {
+            return medium
+        } else if let thumbnail = sizes.thumbnail?.source_url {
+            return thumbnail
+        }
+        
+        return nil
     }
 }

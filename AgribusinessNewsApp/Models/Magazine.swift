@@ -37,4 +37,22 @@ struct WordPressMediaItem: Codable {
     let date: String
     let title: WordPressTitle
     let source_url: String
+    let media_details: WordPressMediaDetails?
+}
+
+// WordPress media details containing auto-generated thumbnails
+struct WordPressMediaDetails: Codable {
+    let sizes: WordPressImageSizes?
+}
+
+struct WordPressImageSizes: Codable {
+    let thumbnail: WordPressImageSize?
+    let medium: WordPressImageSize?
+    let medium_large: WordPressImageSize?
+    let large: WordPressImageSize?
+    let full: WordPressImageSize?
+}
+
+struct WordPressImageSize: Codable {
+    let source_url: String
 }

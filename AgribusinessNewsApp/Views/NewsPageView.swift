@@ -10,20 +10,29 @@ import SwiftUI
 struct NewsPageView: View {
     @ObservedObject var webViewModel: WebViewModel
     @StateObject private var newsService = NewsService()
+    @StateObject private var categoryService = CategoryService()
     @StateObject private var bookmarkManager = BookmarkManager.shared
     @State private var searchText = ""
     @State private var showingBookmarks = false
     @State private var selectedArticle: NewsArticleModel?
+    @State private var selectedCategory: ArticleCategory? = nil // nil means "All"
+    @State private var categoryArticles: [NewsArticleModel] = [] // Articles for selected category
+    @State private var isCategoryLoading = false
     
-    var filteredArticles: [NewsArticleModel] {
-        if searchText.isEmpty {
-            return newsService.articles
+    var displayedArticles: [NewsArticleModel] {
+        // Use category-specific articles when a category is selected
+        let articles = selectedCategory != nil ? categoryArticles : newsService.articles
+        
+        // Filter by search text
+        if !searchText.isEmpty {
+            return articles.filter { article in
+                article.title.localizedCaseInsensitiveContains(searchText) ||
+                article.excerpt.localizedCaseInsensitiveContains(searchText) ||
+                article.category.localizedCaseInsensitiveContains(searchText)
+            }
         }
-        return newsService.articles.filter { article in
-            article.title.localizedCaseInsensitiveContains(searchText) ||
-            article.excerpt.localizedCaseInsensitiveContains(searchText) ||
-            article.category.localizedCaseInsensitiveContains(searchText)
-        }
+        
+        return articles
     }
     
     var body: some View {
@@ -37,11 +46,25 @@ struct NewsPageView: View {
                             onRefresh: {
                                 Task {
                                     try? await newsService.fetchNews()
+                                    try? await categoryService.fetchCategories()
                                 }
                             }
                         )
                         
-                        if newsService.isLoading && newsService.articles.isEmpty {
+                        // Category Filter Chips
+                        if !categoryService.categories.isEmpty {
+                            CategoryFilterChips(
+                                categories: categoryService.categories,
+                                selectedCategory: $selectedCategory,
+                                onCategorySelected: { category in
+                                    Task {
+                                        await loadCategoryArticles(category)
+                                    }
+                                }
+                            )
+                        }
+                        
+                        if (newsService.isLoading && newsService.articles.isEmpty) || isCategoryLoading {
                             // Loading state with skeleton
                             NewsLoadingSkeleton()
                         } else if let error = newsService.error {
@@ -51,17 +74,19 @@ struct NewsPageView: View {
                                     try? await newsService.fetchNews()
                                 }
                             })
-                        } else if filteredArticles.isEmpty {
+                        } else if displayedArticles.isEmpty {
                             // Empty state
-                            if searchText.isEmpty {
+                            if searchText.isEmpty && selectedCategory == nil {
                                 EmptyNewsView()
+                            } else if selectedCategory != nil && searchText.isEmpty {
+                                NoCategoryArticlesView(category: selectedCategory!.displayName)
                             } else {
                                 SearchEmptyView(searchText: searchText)
                             }
                         } else {
                             // News articles with bookmark & share
                             LazyVStack(spacing: 16) {
-                                ForEach(filteredArticles) { article in
+                                ForEach(displayedArticles) { article in
                                     NavigationLink(value: article) {
                                         NewsArticleCardWithActions(
                                             article: article,
@@ -76,6 +101,18 @@ struct NewsPageView: View {
                                         )
                                     }
                                 }
+                                
+                                // Load More button
+                                if newsService.hasMoreArticles && selectedCategory == nil && searchText.isEmpty {
+                                    LoadMoreNewsButton(
+                                        isLoading: newsService.isLoading,
+                                        onTap: {
+                                            Task {
+                                                try? await newsService.loadMoreArticles()
+                                            }
+                                        }
+                                    )
+                                }
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 12)
@@ -85,6 +122,7 @@ struct NewsPageView: View {
                 .scrollDismissesKeyboard(.interactively)
                 .refreshable {
                     try? await newsService.fetchNews()
+                    try? await categoryService.fetchCategories()
                 }
                 
                 // Loading overlay when refreshing
@@ -110,6 +148,9 @@ struct NewsPageView: View {
                 if newsService.articles.isEmpty {
                     try? await newsService.fetchNews()
                 }
+                if categoryService.categories.isEmpty {
+                    try? await categoryService.fetchCategories()
+                }
             }
         }
     }
@@ -128,12 +169,25 @@ struct NewsPageView: View {
             rootVC.present(activityVC, animated: true)
         }
     }
+    
+    private func loadCategoryArticles(_ category: ArticleCategory?) async {
+        if let category = category {
+            isCategoryLoading = true
+            if let articles = try? await newsService.fetchArticlesByCategory(category.id, limit: 50) {
+                categoryArticles = articles
+            }
+            isCategoryLoading = false
+        } else {
+            categoryArticles = []
+        }
+    }
 }
 
 // MARK: - Header with Search
 struct NewsHeaderWithSearch: View {
     @Binding var searchText: String
     let onRefresh: () -> Void
+    @FocusState private var isSearchFocused: Bool
     
     var body: some View {
         VStack(spacing: 12) {
@@ -158,10 +212,12 @@ struct NewsHeaderWithSearch: View {
             .padding(.top, 16)
             
             // Search Bar
-            HStack {
+            HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.secondary)
+                
                 TextField("Search news...", text: $searchText)
+                    .focused($isSearchFocused)
                     .textFieldStyle(.plain)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
@@ -170,6 +226,7 @@ struct NewsHeaderWithSearch: View {
                 if !searchText.isEmpty {
                     Button(action: {
                         searchText = ""
+                        isSearchFocused = false
                     }) {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.secondary)
@@ -179,9 +236,11 @@ struct NewsHeaderWithSearch: View {
             .padding(12)
             .background(Color(.systemGray6))
             .cornerRadius(10)
+            .onTapGesture {
+                isSearchFocused = true
+            }
             .padding(.horizontal, 20)
             .padding(.bottom, 12)
-            .contentShape(Rectangle())
         }
         .background(Color(.systemBackground))
     }
@@ -675,6 +734,127 @@ struct LoadMoreButton: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 20)
+    }
+}
+
+// MARK: - Load More News Button
+struct LoadMoreNewsButton: View {
+    let isLoading: Bool
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 8) {
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(0.8)
+                } else {
+                    Image(systemName: "arrow.down.circle.fill")
+                        .font(.body)
+                }
+                Text(isLoading ? "Loading..." : "Load More Articles")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(Color.green.opacity(isLoading ? 0.7 : 1.0))
+            .cornerRadius(10)
+        }
+        .disabled(isLoading)
+        .padding(.top, 8)
+    }
+}
+
+// MARK: - Category Filter Chips
+struct CategoryFilterChips: View {
+    let categories: [ArticleCategory]
+    @Binding var selectedCategory: ArticleCategory?
+    let onCategorySelected: (ArticleCategory?) -> Void
+    
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                // "All" chip
+                CategoryChip(
+                    title: "All",
+                    icon: "square.grid.2x2.fill",
+                    isSelected: selectedCategory == nil,
+                    onTap: {
+                        selectedCategory = nil
+                        onCategorySelected(nil)
+                    }
+                )
+                
+                ForEach(categories) { category in
+                    CategoryChip(
+                        title: category.displayName,
+                        icon: category.icon,
+                        isSelected: selectedCategory?.id == category.id,
+                        onTap: {
+                            selectedCategory = category
+                            onCategorySelected(category)
+                        }
+                    )
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+        }
+        .background(Color(.systemBackground))
+    }
+}
+
+// MARK: - Category Chip
+struct CategoryChip: View {
+    let title: String
+    let icon: String
+    let isSelected: Bool
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.caption)
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(isSelected ? .semibold : .regular)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(isSelected ? Color.green : Color(.systemGray6))
+            .foregroundColor(isSelected ? .white : .primary)
+            .cornerRadius(20)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - No Category Articles View
+struct NoCategoryArticlesView: View {
+    let category: String
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "doc.text.magnifyingglass")
+                .font(.system(size: 48))
+                .foregroundColor(.gray)
+            
+            Text("No \(category) Articles")
+                .font(.title3)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+            
+            Text("There are no articles in this category yet. Try selecting a different category.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+        }
+        .padding(.vertical, 60)
     }
 }
 

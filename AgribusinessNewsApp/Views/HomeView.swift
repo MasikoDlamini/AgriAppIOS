@@ -10,6 +10,7 @@ import SwiftUI
 struct HomeView: View {
     @ObservedObject var webViewModel: WebViewModel
     @Binding var selectedTab: Int
+    @Binding var homeResetTrigger: Bool  // Triggers reset to default home view
     @State private var showWebView = false
     @State private var selectedURL = ""
     @StateObject private var newsService = NewsService()
@@ -27,6 +28,11 @@ struct HomeView: View {
     @State private var selectedCategory: ArticleCategory?
     @State private var categoryArticles: [NewsArticleModel] = []
     @State private var isCategoryLoading = false
+    
+    // Category-based articles
+    @State private var cropsArticles: [NewsArticleModel] = []
+    @State private var livestockArticles: [NewsArticleModel] = []
+    @State private var sponsoredArticles: [NewsArticleModel] = []
     
     var featuredArticles: [NewsArticleModel] {
         Array(latestNews.prefix(5))
@@ -46,6 +52,10 @@ struct HomeView: View {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 showMenu = true
                             }
+                        }, onLogoTap: {
+                            // Tapping logo clears category and returns to default home
+                            selectedCategory = nil
+                            categoryArticles = []
                         })
                         
                         // Category filter banner
@@ -90,23 +100,6 @@ struct HomeView: View {
                         )
                     }
                     
-                    // Quick Categories
-                    CategoriesGridView(
-                        onCategoryTap: { category in
-                            switch category {
-                            case "News":
-                                selectedTab = 1
-                            case "Magazines":
-                                selectedTab = 2
-                            case "Videos":
-                                selectedTab = 3
-                            default:
-                                selectedURL = "https://agribusinessmedia.com"
-                                showWebView = true
-                            }
-                        }
-                    )
-                    
                     // Magazine Highlight Section
                     if let magazine = latestMagazine {
                         MagazineHighlightSection(
@@ -131,9 +124,38 @@ struct HomeView: View {
                         }
                     )
                     
-                    // Latest News Section
-                    LatestNewsSection(
-                        articles: remainingArticles,
+                    // Category News Sections with Horizontal Scrolling
+                    HorizontalCategoryNewsSection(
+                        title: "Crops",
+                        icon: "leaf.fill",
+                        iconColor: .green,
+                        articles: cropsArticles,
+                        onArticleTap: { article in
+                            selectedArticle = article
+                        },
+                        onViewAllTap: {
+                            selectedTab = 1
+                        }
+                    )
+                    
+                    HorizontalCategoryNewsSection(
+                        title: "Livestock",
+                        icon: "hare.fill",
+                        iconColor: .orange,
+                        articles: livestockArticles,
+                        onArticleTap: { article in
+                            selectedArticle = article
+                        },
+                        onViewAllTap: {
+                            selectedTab = 1
+                        }
+                    )
+                    
+                    HorizontalCategoryNewsSection(
+                        title: "Sponsored",
+                        icon: "star.fill",
+                        iconColor: .purple,
+                        articles: sponsoredArticles,
                         onArticleTap: { article in
                             selectedArticle = article
                         },
@@ -200,6 +222,11 @@ struct HomeView: View {
                 }
             }
         }
+        .onChange(of: homeResetTrigger) { _, _ in
+            // Reset to default home view when triggered
+            selectedCategory = nil
+            categoryArticles = []
+        }
     }
     
     private func loadAllContent() async {
@@ -207,6 +234,9 @@ struct HomeView: View {
         async let news = newsService.fetchNews()
         async let videos = videoService.fetchVideos()
         async let magazines = magazineService.fetchMagazines()
+        async let crops = newsService.fetchNewsByCategorySlug("crops", limit: 5)
+        async let livestock = newsService.fetchNewsByCategorySlug("livestock", limit: 5)
+        async let sponsored = newsService.fetchNewsByCategorySlug("sponsored", limit: 5)
         
         if let allNews = try? await news {
             latestNews = Array(allNews.prefix(11))
@@ -216,6 +246,15 @@ struct HomeView: View {
         }
         if let allMagazines = try? await magazines, let first = allMagazines.first {
             latestMagazine = first
+        }
+        if let cropsNews = try? await crops {
+            cropsArticles = cropsNews
+        }
+        if let livestockNews = try? await livestock {
+            livestockArticles = livestockNews
+        }
+        if let sponsoredNews = try? await sponsored {
+            sponsoredArticles = sponsoredNews
         }
         isLoading = false
     }
@@ -224,6 +263,9 @@ struct HomeView: View {
         async let news = newsService.fetchNews()
         async let videos = videoService.fetchVideos()
         async let magazines = magazineService.fetchMagazines()
+        async let crops = newsService.fetchNewsByCategorySlug("crops", limit: 5)
+        async let livestock = newsService.fetchNewsByCategorySlug("livestock", limit: 5)
+        async let sponsored = newsService.fetchNewsByCategorySlug("sponsored", limit: 5)
         
         if let allNews = try? await news {
             latestNews = Array(allNews.prefix(11))
@@ -233,6 +275,15 @@ struct HomeView: View {
         }
         if let allMagazines = try? await magazines, let first = allMagazines.first {
             latestMagazine = first
+        }
+        if let cropsNews = try? await crops {
+            cropsArticles = cropsNews
+        }
+        if let livestockNews = try? await livestock {
+            livestockArticles = livestockNews
+        }
+        if let sponsoredNews = try? await sponsored {
+            sponsoredArticles = sponsoredNews
         }
     }
     
@@ -493,7 +544,41 @@ struct MagazineCoverPreview: View {
     
     var body: some View {
         ZStack {
-            // Background gradient matching MagazinesView style
+            if let coverUrl = magazine.coverImageUrl, let url = URL(string: coverUrl) {
+                // Display actual cover image
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    case .failure(_):
+                        // Fallback to gradient on failure
+                        MagazineCoverPlaceholder(magazine: magazine)
+                    case .empty:
+                        // Loading state
+                        Color.gray.opacity(0.3)
+                            .overlay(ProgressView())
+                    @unknown default:
+                        MagazineCoverPlaceholder(magazine: magazine)
+                    }
+                }
+            } else {
+                // Fallback gradient when no cover URL
+                MagazineCoverPlaceholder(magazine: magazine)
+            }
+        }
+        .cornerRadius(8)
+        .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
+    }
+}
+
+// MARK: - Magazine Cover Placeholder
+struct MagazineCoverPlaceholder: View {
+    let magazine: Magazine
+    
+    var body: some View {
+        ZStack {
             LinearGradient(
                 gradient: Gradient(colors: [Color.green.opacity(0.8), Color.green.opacity(0.95)]),
                 startPoint: .topLeading,
@@ -523,14 +608,13 @@ struct MagazineCoverPreview: View {
             }
             .padding(.vertical, 12)
         }
-        .cornerRadius(8)
-        .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
     }
 }
 
 // MARK: - Header
 struct HeaderView: View {
     let onMenuTap: () -> Void
+    var onLogoTap: (() -> Void)? = nil
     
     var body: some View {
         VStack(spacing: 0) {
@@ -544,15 +628,20 @@ struct HeaderView: View {
                 
                 Spacer()
                 
-                VStack(spacing: 0) {
-                    Text("AGRIBUSINESS")
-                        .font(.system(size: 22, weight: .black, design: .default))
-                        .foregroundColor(.green)
-                    Text("NEWS")
-                        .font(.system(size: 14, weight: .bold, design: .default))
-                        .foregroundColor(.primary)
-                        .tracking(6)
+                Button(action: {
+                    onLogoTap?()
+                }) {
+                    VStack(spacing: 0) {
+                        Text("AGRIBUSINESS")
+                            .font(.system(size: 22, weight: .black, design: .default))
+                            .foregroundColor(.green)
+                        Text("NEWS")
+                            .font(.system(size: 14, weight: .bold, design: .default))
+                            .foregroundColor(.primary)
+                            .tracking(6)
+                    }
                 }
+                .buttonStyle(.plain)
                 
                 Spacer()
                 
@@ -576,6 +665,7 @@ struct FeaturedArticleSlideshow: View {
     
     @State private var currentIndex = 0
     @State private var timer: Timer?
+    @State private var loadedImages: Set<Int> = []
     
     var body: some View {
         VStack(spacing: 0) {
@@ -583,7 +673,16 @@ struct FeaturedArticleSlideshow: View {
                 // Use TabView for synchronized image + text sliding
                 TabView(selection: $currentIndex) {
                     ForEach(Array(articles.enumerated()), id: \.element.id) { index, article in
-                        FeaturedSlideItem(article: article)
+                        FeaturedSlideItem(
+                            article: article,
+                            onImageLoaded: {
+                                loadedImages.insert(index)
+                                // Start timer once the first image is loaded
+                                if index == 0 && timer == nil {
+                                    startAutoRotation()
+                                }
+                            }
+                        )
                             .tag(index)
                             .onTapGesture {
                                 onArticleTap(article)
@@ -649,9 +748,6 @@ struct FeaturedArticleSlideshow: View {
                 .background(Color(.systemBackground))
             }
         }
-        .onAppear {
-            startAutoRotation()
-        }
         .onDisappear {
             stopAutoRotation()
         }
@@ -660,8 +756,12 @@ struct FeaturedArticleSlideshow: View {
     private func startAutoRotation() {
         guard !articles.isEmpty else { return }
         timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
-            withAnimation(.easeInOut(duration: 0.5)) {
-                currentIndex = (currentIndex + 1) % articles.count
+            let nextIndex = (currentIndex + 1) % articles.count
+            // Only advance if the next image is loaded
+            if loadedImages.contains(nextIndex) {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    currentIndex = nextIndex
+                }
             }
         }
     }
@@ -675,6 +775,7 @@ struct FeaturedArticleSlideshow: View {
 // MARK: - Featured Slide Item
 struct FeaturedSlideItem: View {
     let article: NewsArticleModel
+    let onImageLoaded: () -> Void
     
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -698,8 +799,14 @@ struct FeaturedSlideItem: View {
                                     endPoint: .bottom
                                 )
                             )
+                            .onAppear {
+                                onImageLoaded()
+                            }
                     case .failure(_):
                         FeaturedPlaceholderBackground()
+                            .onAppear {
+                                onImageLoaded()
+                            }
                     case .empty:
                         Color.gray.opacity(0.3)
                             .frame(height: 200)
@@ -711,6 +818,9 @@ struct FeaturedSlideItem: View {
                 }
             } else {
                 FeaturedPlaceholderBackground()
+                    .onAppear {
+                        onImageLoaded()
+                    }
             }
             
             // Content overlay
@@ -761,61 +871,6 @@ struct FeaturedPlaceholderBackground: View {
         )
         .frame(height: 200)
     }
-}
-
-// MARK: - Categories Horizontal Scroll
-struct CategoriesGridView: View {
-    let onCategoryTap: (String) -> Void
-    
-    let categories = [
-        CategoryItem(icon: "newspaper.fill", title: "News", color: .blue),
-        CategoryItem(icon: "book.fill", title: "Magazines", color: .orange),
-        CategoryItem(icon: "video.fill", title: "Videos", color: .red)
-    ]
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Quick Access")
-                .font(.title3)
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(categories) { category in
-                        Button(action: {
-                            onCategoryTap(category.title)
-                        }) {
-                            VStack(spacing: 10) {
-                                Image(systemName: category.icon)
-                                    .font(.system(size: 28))
-                                    .foregroundColor(category.color)
-                                Text(category.title)
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.primary)
-                            }
-                            .frame(width: 100, height: 90)
-                            .background(Color(.systemBackground))
-                            .cornerRadius(12)
-                            .shadow(color: Color.black.opacity(0.08), radius: 5, x: 0, y: 2)
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
-            }
-        }
-        .padding(.bottom, 12)
-    }
-}
-
-struct CategoryItem: Identifiable {
-    let id = UUID()
-    let icon: String
-    let title: String
-    let color: Color
 }
 
 // MARK: - Agri-TV Preview Section
@@ -1107,6 +1162,182 @@ struct LatestNewsSection: View {
     }
 }
 
+// MARK: - Horizontal Category News Section
+struct HorizontalCategoryNewsSection: View {
+    let title: String
+    let icon: String
+    let iconColor: Color
+    let articles: [NewsArticleModel]
+    let onArticleTap: (NewsArticleModel) -> Void
+    let onViewAllTap: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Section Header
+            HStack {
+                HStack(spacing: 8) {
+                    Image(systemName: icon)
+                        .foregroundColor(iconColor)
+                    Text(title)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                }
+                
+                Spacer()
+                
+                Button(action: onViewAllTap) {
+                    HStack(spacing: 4) {
+                        Text("View All")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                        Image(systemName: "arrow.right")
+                            .font(.caption)
+                    }
+                    .foregroundColor(iconColor)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            
+            // Horizontal scrolling articles
+            if articles.isEmpty {
+                // Loading/Empty state
+                HorizontalCategoryNewsSkeleton()
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 14) {
+                        ForEach(articles) { article in
+                            HorizontalCategoryNewsCard(article: article, accentColor: iconColor)
+                                .onTapGesture {
+                                    onArticleTap(article)
+                                }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+            }
+        }
+        .padding(.bottom, 8)
+    }
+}
+
+// MARK: - Horizontal Category News Card
+struct HorizontalCategoryNewsCard: View {
+    let article: NewsArticleModel
+    let accentColor: Color
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Thumbnail
+            ZStack(alignment: .topLeading) {
+                if let imageURL = article.image {
+                    AsyncImage(url: URL(string: imageURL)) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        case .failure(_):
+                            CategoryNewsPlaceholder(color: accentColor)
+                        case .empty:
+                            Color.gray.opacity(0.3)
+                                .overlay(ProgressView())
+                        @unknown default:
+                            CategoryNewsPlaceholder(color: accentColor)
+                        }
+                    }
+                } else {
+                    CategoryNewsPlaceholder(color: accentColor)
+                }
+                
+                // Category badge
+                Text(article.category.uppercased())
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(accentColor.opacity(0.9))
+                    .cornerRadius(4)
+                    .padding(8)
+            }
+            .frame(width: 180, height: 110)
+            .cornerRadius(10)
+            .clipped()
+            
+            // Title
+            Text(article.title)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .frame(width: 180, alignment: .leading)
+            
+            // Date
+            Text(article.date)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .frame(width: 180)
+        .padding(10)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
+    }
+}
+
+// MARK: - Category News Placeholder
+struct CategoryNewsPlaceholder: View {
+    let color: Color
+    
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                gradient: Gradient(colors: [color.opacity(0.3), color.opacity(0.6)]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            Image(systemName: "newspaper.fill")
+                .font(.title2)
+                .foregroundColor(.white)
+        }
+    }
+}
+
+// MARK: - Horizontal Category News Skeleton
+struct HorizontalCategoryNewsSkeleton: View {
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 14) {
+                ForEach(0..<3, id: \.self) { _ in
+                    VStack(alignment: .leading, spacing: 8) {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(width: 180, height: 110)
+                            .shimmer()
+                        
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(width: 160, height: 14)
+                            .shimmer()
+                        
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(width: 100, height: 12)
+                            .shimmer()
+                    }
+                    .frame(width: 180)
+                    .padding(10)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
+                }
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+}
+
 // MARK: - Web View Modal
 struct WebViewModal: View {
     let url: String
@@ -1170,5 +1401,5 @@ struct WebViewModal: View {
 }
 
 #Preview {
-    HomeView(webViewModel: WebViewModel(), selectedTab: .constant(0))
+    HomeView(webViewModel: WebViewModel(), selectedTab: .constant(0), homeResetTrigger: .constant(false))
 }

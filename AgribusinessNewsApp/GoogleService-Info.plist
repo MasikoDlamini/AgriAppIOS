@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyBiMjPptw3f_n98U_NGuhpYmsQkgi9kGH0</string>
+	<key>GCM_SENDER_ID</key>
+	<string>62625538360</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.agribusiness.newsapp</string>
+	<key>PROJECT_ID</key>
+	<string>agribusiness-news-ios</string>
+	<key>STORAGE_BUCKET</key>
+	<string>agribusiness-news-ios.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:62625538360:ios:3d6714ad96ccadd60da1cd</string>
+</dict>
+</plist>

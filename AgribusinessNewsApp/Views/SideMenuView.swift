@@ -13,6 +13,7 @@ struct SideMenuView: View {
     @StateObject private var categoryService = CategoryService()
     let onCategorySelected: (ArticleCategory?) -> Void
     @State private var showAbout = false
+    @State private var showNotificationSettings = false
     
     var body: some View {
         ZStack(alignment: .leading) {
@@ -131,6 +132,32 @@ struct SideMenuView: View {
                     
                     Spacer()
                     
+                    // Notification Settings Button
+                    Divider()
+                    
+                    Button(action: {
+                        showNotificationSettings = true
+                    }) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "bell.fill")
+                                .font(.system(size: 18))
+                                .foregroundColor(.orange)
+                                .frame(width: 28)
+                            
+                            Text("Notifications")
+                                .font(.body)
+                            
+                            Spacer()
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 14)
+                    }
+                    
                     // About Us Button
                     Divider()
                     
@@ -166,6 +193,9 @@ struct SideMenuView: View {
         }
         .sheet(isPresented: $showAbout) {
             AboutView()
+        }
+        .sheet(isPresented: $showNotificationSettings) {
+            NotificationSettingsView()
         }
         .task {
             if categoryService.categories.isEmpty {

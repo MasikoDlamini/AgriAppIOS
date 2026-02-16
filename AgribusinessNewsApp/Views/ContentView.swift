@@ -10,13 +10,15 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var tabViewModel = TabViewModel()
     @State private var selectedTab = 0
+    @State private var homeResetTrigger = false
     
     var body: some View {
         TabView(selection: $selectedTab) {
             NavigationView {
                 HomeView(
                     webViewModel: tabViewModel.homeWebViewModel,
-                    selectedTab: $selectedTab
+                    selectedTab: $selectedTab,
+                    homeResetTrigger: $homeResetTrigger
                 )
                 .navigationBarHidden(true)
             }
@@ -61,6 +63,12 @@ struct ContentView: View {
             .tag(3)
         }
         .accentColor(.green)
+        .onChange(of: selectedTab) { oldValue, newValue in
+            // Reset home view when switching back to Home tab
+            if newValue == 0 && oldValue != 0 {
+                homeResetTrigger.toggle()
+            }
+        }
     }
 }
 

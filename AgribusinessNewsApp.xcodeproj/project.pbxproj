@@ -35,6 +35,15 @@
 		AA000069 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000070 /* AboutView.swift */; };
 		C32FE0A02EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf in Resources */ = {isa = PBXBuildFile; fileRef = C32FE09F2EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf */; };
 		C384EE092F412AE50044D1BA /* AgriTVView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C384EE082F412AE50044D1BA /* AgriTVView.swift */; };
+		C3CE66EF2F42B507009EF9A7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C3CE66EE2F42B507009EF9A7 /* GoogleService-Info.plist */; };
+		C3CE66F22F42BD0F009EF9A7 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = C3CE66F12F42BD0F009EF9A7 /* FirebaseAnalytics */; };
+		C3CE66F42F42BD0F009EF9A7 /* FirebaseAnalyticsOnDeviceConversion in Frameworks */ = {isa = PBXBuildFile; productRef = C3CE66F32F42BD0F009EF9A7 /* FirebaseAnalyticsOnDeviceConversion */; };
+		C3CE66F62F42BD0F009EF9A7 /* FirebaseAnalyticsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C3CE66F52F42BD0F009EF9A7 /* FirebaseAnalyticsSwift */; };
+		C3CE66F82F42BD0F009EF9A7 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = C3CE66F72F42BD0F009EF9A7 /* FirebaseAnalyticsWithoutAdIdSupport */; };
+		C3CE66FA2F42BD0F009EF9A7 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = C3CE66F92F42BD0F009EF9A7 /* FirebaseAppCheck */; };
+		C3CE66FD2F42C3EF009EF9A7 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = C3CE66FC2F42C3EF009EF9A7 /* FirebaseMessaging */; };
+		C3CE66FF2F42C572009EF9A7 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3CE66FE2F42C572009EF9A7 /* NotificationManager.swift */; };
+		C3CE67002F42C573009EF9A7 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3CE67012F42C573009EF9A7 /* NotificationSettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +77,10 @@
 		AA000070 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		C32FE09F2EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "ISSUE-29-NOV-2025-compressed.pdf"; sourceTree = "<group>"; };
 		C384EE082F412AE50044D1BA /* AgriTVView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AgriTVView.swift; sourceTree = "<group>"; };
+		C3CE66ED2F42B1F3009EF9A7 /* AgribusinessNewsApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AgribusinessNewsApp.entitlements; sourceTree = "<group>"; };
+		C3CE66EE2F42B507009EF9A7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		C3CE66FE2F42C572009EF9A7 /* NotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		C3CE67012F42C573009EF9A7 /* NotificationSettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +88,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C3CE66FD2F42C3EF009EF9A7 /* FirebaseMessaging in Frameworks */,
+				C3CE66F62F42BD0F009EF9A7 /* FirebaseAnalyticsSwift in Frameworks */,
+				C3CE66F22F42BD0F009EF9A7 /* FirebaseAnalytics in Frameworks */,
+				C3CE66F42F42BD0F009EF9A7 /* FirebaseAnalyticsOnDeviceConversion in Frameworks */,
+				C3CE66FA2F42BD0F009EF9A7 /* FirebaseAppCheck in Frameworks */,
+				C3CE66F82F42BD0F009EF9A7 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,12 +106,15 @@
 				C32FE09E2EDCF76700C8FF23 /* Magazines */,
 				AA000017 /* AgribusinessNewsApp */,
 				AA000018 /* Products */,
+				C3CE66FB2F42C3EF009EF9A7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
 		AA000017 /* AgribusinessNewsApp */ = {
 			isa = PBXGroup;
 			children = (
+				C3CE66ED2F42B1F3009EF9A7 /* AgribusinessNewsApp.entitlements */,
+				C3CE66EE2F42B507009EF9A7 /* GoogleService-Info.plist */,
 				AA000002 /* AgribusinessNewsAppApp.swift */,
 				AA000019 /* Views */,
 				AA000020 /* Models */,
@@ -127,6 +149,7 @@
 				AA000062 /* SkeletonLoaders.swift */,
 				AA000066 /* SideMenuView.swift */,
 				AA000070 /* AboutView.swift */,
+				C3CE67012F42C573009EF9A7 /* NotificationSettingsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -134,6 +157,7 @@
 		AA000020 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				C3CE66FE2F42C572009EF9A7 /* NotificationManager.swift */,
 				AA000010 /* WebViewModel.swift */,
 				AA000032 /* TabViewModel.swift */,
 				AA000040 /* NewsArticle.swift */,
@@ -157,6 +181,13 @@
 			path = Magazines;
 			sourceTree = "<group>";
 		};
+		C3CE66FB2F42C3EF009EF9A7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -173,6 +204,14 @@
 			dependencies = (
 			);
 			name = AgribusinessNewsApp;
+			packageProductDependencies = (
+				C3CE66F12F42BD0F009EF9A7 /* FirebaseAnalytics */,
+				C3CE66F32F42BD0F009EF9A7 /* FirebaseAnalyticsOnDeviceConversion */,
+				C3CE66F52F42BD0F009EF9A7 /* FirebaseAnalyticsSwift */,
+				C3CE66F72F42BD0F009EF9A7 /* FirebaseAnalyticsWithoutAdIdSupport */,
+				C3CE66F92F42BD0F009EF9A7 /* FirebaseAppCheck */,
+				C3CE66FC2F42C3EF009EF9A7 /* FirebaseMessaging */,
+			);
 			productName = AgribusinessNewsApp;
 			productReference = AA000013 /* AgribusinessNewsApp.app */;
 			productType = "com.apple.product-type.application";
@@ -201,6 +240,9 @@
 				Base,
 			);
 			mainGroup = AA000016;
+			packageReferences = (
+				C3CE66F02F42BD0F009EF9A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = AA000018 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -217,6 +259,7 @@
 			files = (
 				C32FE0A02EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf in Resources */,
 				AA000011 /* Assets.xcassets in Resources */,
+				C3CE66EF2F42B507009EF9A7 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,6 +282,7 @@
 				AA000009 /* WebViewModel.swift in Sources */,
 				AA000039 /* NewsArticle.swift in Sources */,
 				AA000041 /* NewsService.swift in Sources */,
+				C3CE66FF2F42C572009EF9A7 /* NotificationManager.swift in Sources */,
 				AA000045 /* BookmarkManager.swift in Sources */,
 				AA000049 /* Magazine.swift in Sources */,
 				AA000051 /* MagazineService.swift in Sources */,
@@ -247,6 +291,7 @@
 				AA000055 /* Video.swift in Sources */,
 				AA000057 /* VideoService.swift in Sources */,
 				AA000059 /* YouTubePlayerView.swift in Sources */,
+				C3CE67002F42C573009EF9A7 /* NotificationSettingsView.swift in Sources */,
 				AA000061 /* SkeletonLoaders.swift in Sources */,
 				AA000063 /* CategoryService.swift in Sources */,
 				AA000065 /* SideMenuView.swift in Sources */,
@@ -383,6 +428,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AgribusinessNewsApp/AgribusinessNewsApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 5RK669KK4S;
@@ -415,6 +461,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AgribusinessNewsApp/AgribusinessNewsApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 5RK669KK4S;
@@ -464,6 +511,50 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C3CE66F02F42BD0F009EF9A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = exactVersion;
+				version = 10.25.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C3CE66F12F42BD0F009EF9A7 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C3CE66F02F42BD0F009EF9A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		C3CE66F32F42BD0F009EF9A7 /* FirebaseAnalyticsOnDeviceConversion */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C3CE66F02F42BD0F009EF9A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsOnDeviceConversion;
+		};
+		C3CE66F52F42BD0F009EF9A7 /* FirebaseAnalyticsSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C3CE66F02F42BD0F009EF9A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsSwift;
+		};
+		C3CE66F72F42BD0F009EF9A7 /* FirebaseAnalyticsWithoutAdIdSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C3CE66F02F42BD0F009EF9A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsWithoutAdIdSupport;
+		};
+		C3CE66F92F42BD0F009EF9A7 /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C3CE66F02F42BD0F009EF9A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
+		};
+		C3CE66FC2F42C3EF009EF9A7 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C3CE66F02F42BD0F009EF9A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AA000025 /* Project object */;
 }

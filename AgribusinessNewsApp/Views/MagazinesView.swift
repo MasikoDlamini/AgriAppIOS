@@ -178,41 +178,36 @@ struct MagazineCoverViewDynamic: View {
         VStack(spacing: 0) {
             // Cover
             ZStack {
-                coverColor
-                    .frame(height: 240)
-                
-                VStack(spacing: 16) {
-                    Image(systemName: "book.closed.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.white)
-                    
-                    VStack(spacing: 8) {
-                        Text("AGRIBUSINESS")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white.opacity(0.9))
-                        
-                        Text("MONTHLY")
-                            .font(.title2)
-                            .fontWeight(.heavy)
-                            .foregroundColor(.white)
-                        
-                        Divider()
-                            .background(Color.white.opacity(0.5))
-                            .frame(width: 60)
-                        
-                        Text(magazine.issueLabel.uppercased())
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white.opacity(0.9))
-                        
-                        Text(magazine.displayTitle.uppercased())
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
+                if let coverUrl = magazine.coverImageUrl, let url = URL(string: coverUrl) {
+                    // Display actual cover image
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(height: 240)
+                                .clipped()
+                        case .failure(_):
+                            // Fallback to placeholder on failure
+                            MagazineCoverDynamicPlaceholder(coverColor: coverColor, magazine: magazine)
+                        case .empty:
+                            // Loading state
+                            ZStack {
+                                coverColor
+                                    .frame(height: 240)
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            }
+                        @unknown default:
+                            MagazineCoverDynamicPlaceholder(coverColor: coverColor, magazine: magazine)
+                        }
                     }
+                    .frame(height: 240)
+                } else {
+                    // Fallback placeholder when no cover URL
+                    MagazineCoverDynamicPlaceholder(coverColor: coverColor, magazine: magazine)
                 }
-                .padding()
             }
             .cornerRadius(12)
             .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
@@ -233,6 +228,52 @@ struct MagazineCoverViewDynamic: View {
                 .foregroundColor(.green)
             }
             .padding(.top, 12)
+        }
+    }
+}
+
+// MARK: - Magazine Cover Dynamic Placeholder
+struct MagazineCoverDynamicPlaceholder: View {
+    let coverColor: Color
+    let magazine: Magazine
+    
+    var body: some View {
+        ZStack {
+            coverColor
+                .frame(height: 240)
+            
+            VStack(spacing: 16) {
+                Image(systemName: "book.closed.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.white)
+                
+                VStack(spacing: 8) {
+                    Text("AGRIBUSINESS")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white.opacity(0.9))
+                    
+                    Text("MONTHLY")
+                        .font(.title2)
+                        .fontWeight(.heavy)
+                        .foregroundColor(.white)
+                    
+                    Divider()
+                        .background(Color.white.opacity(0.5))
+                        .frame(width: 60)
+                    
+                    Text(magazine.issueLabel.uppercased())
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white.opacity(0.9))
+                    
+                    Text(magazine.displayTitle.uppercased())
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                }
+            }
+            .padding()
         }
     }
 }
