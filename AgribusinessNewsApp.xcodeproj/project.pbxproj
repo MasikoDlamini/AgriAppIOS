@@ -78,7 +78,7 @@
 		C32FE09F2EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "ISSUE-29-NOV-2025-compressed.pdf"; sourceTree = "<group>"; };
 		C384EE082F412AE50044D1BA /* AgriTVView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AgriTVView.swift; sourceTree = "<group>"; };
 		C3CE66ED2F42B1F3009EF9A7 /* AgribusinessNewsApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AgribusinessNewsApp.entitlements; sourceTree = "<group>"; };
-		C3CE66EE2F42B507009EF9A7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		C3CE66EE2F42B507009EF9A7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		C3CE66FE2F42C572009EF9A7 /* NotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		C3CE67012F42C573009EF9A7 /* NotificationSettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
