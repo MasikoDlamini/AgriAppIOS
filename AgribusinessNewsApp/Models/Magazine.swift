@@ -17,7 +17,7 @@ struct Magazine: Codable, Identifiable {
     let publishedDate: String
     
     var displayTitle: String {
-        monthYear
+        issueNumber.isEmpty ? title : issueNumber
     }
     
     var issueLabel: String {

@@ -213,21 +213,12 @@ class NewsService: ObservableObject {
     
     private func formatDate(_ dateString: String) -> String {
         let formatter = ISO8601DateFormatter()
-        guard let date = formatter.date(from: dateString) else { return "Recent" }
+        guard let date = formatter.date(from: dateString) else { return dateString }
         
-        let now = Date()
-        let hours = Int(now.timeIntervalSince(date) / 3600)
-        
-        if hours < 1 {
-            return "Just now"
-        } else if hours < 24 {
-            return "\(hours)h ago"
-        } else if hours < 48 {
-            return "Yesterday"
-        } else {
-            let days = hours / 24
-            return "\(days)d ago"
-        }
+        let displayFormatter = DateFormatter()
+        displayFormatter.dateStyle = .medium
+        displayFormatter.timeStyle = .none
+        return displayFormatter.string(from: date)
     }
 }
 

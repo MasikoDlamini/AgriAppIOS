@@ -496,11 +496,6 @@ struct MagazineHighlightSection: View {
                             .background(Color.orange.opacity(0.15))
                             .cornerRadius(4)
                         
-                        Text(magazine.monthYear)
-                            .font(.headline)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
-                        
                         Text(magazine.title)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
@@ -600,10 +595,6 @@ struct MagazineCoverPlaceholder: View {
                     Text(magazine.issueNumber)
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.white)
-                    
-                    Text(magazine.monthYear)
-                        .font(.system(size: 9))
-                        .foregroundColor(.white.opacity(0.9))
                 }
             }
             .padding(.vertical, 12)

@@ -34,7 +34,12 @@
 		AA000067 /* TeamMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000068 /* TeamMember.swift */; };
 		AA000069 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000070 /* AboutView.swift */; };
 		C32FE0A02EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf in Resources */ = {isa = PBXBuildFile; fileRef = C32FE09F2EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf */; };
+		C36B6BE02F44B26D000C5DB5 /* MarketplaceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36B6BDF2F44B26C000C5DB5 /* MarketplaceListView.swift */; };
+		C36B6BE22F44B278000C5DB5 /* MarketplaceUploadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36B6BE12F44B278000C5DB5 /* MarketplaceUploadView.swift */; };
+		C36B6BE42F44CC86000C5DB5 /* MarketplaceUploadAPIForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36B6BE32F44CC86000C5DB5 /* MarketplaceUploadAPIForm.swift */; };
 		C384EE092F412AE50044D1BA /* AgriTVView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C384EE082F412AE50044D1BA /* AgriTVView.swift */; };
+		C39B1D502F452C9F00C1C31E /* String+HTMLStripped.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39B1D4F2F452C9F00C1C31E /* String+HTMLStripped.swift */; };
+		C3B503832F44CF80009141FF /* MarketplaceAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B503822F44CF80009141FF /* MarketplaceAPIService.swift */; };
 		C3CE66EF2F42B507009EF9A7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C3CE66EE2F42B507009EF9A7 /* GoogleService-Info.plist */; };
 		C3CE66F22F42BD0F009EF9A7 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = C3CE66F12F42BD0F009EF9A7 /* FirebaseAnalytics */; };
 		C3CE66F42F42BD0F009EF9A7 /* FirebaseAnalyticsOnDeviceConversion in Frameworks */ = {isa = PBXBuildFile; productRef = C3CE66F32F42BD0F009EF9A7 /* FirebaseAnalyticsOnDeviceConversion */; };
@@ -76,7 +81,12 @@
 		AA000068 /* TeamMember.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamMember.swift; sourceTree = "<group>"; };
 		AA000070 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		C32FE09F2EDCF82C00C8FF23 /* ISSUE-29-NOV-2025-compressed.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "ISSUE-29-NOV-2025-compressed.pdf"; sourceTree = "<group>"; };
+		C36B6BDF2F44B26C000C5DB5 /* MarketplaceListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarketplaceListView.swift; sourceTree = "<group>"; };
+		C36B6BE12F44B278000C5DB5 /* MarketplaceUploadView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarketplaceUploadView.swift; sourceTree = "<group>"; };
+		C36B6BE32F44CC86000C5DB5 /* MarketplaceUploadAPIForm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarketplaceUploadAPIForm.swift; sourceTree = "<group>"; };
 		C384EE082F412AE50044D1BA /* AgriTVView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AgriTVView.swift; sourceTree = "<group>"; };
+		C39B1D4F2F452C9F00C1C31E /* String+HTMLStripped.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+HTMLStripped.swift"; sourceTree = "<group>"; };
+		C3B503822F44CF80009141FF /* MarketplaceAPIService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarketplaceAPIService.swift; sourceTree = "<group>"; };
 		C3CE66ED2F42B1F3009EF9A7 /* AgribusinessNewsApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AgribusinessNewsApp.entitlements; sourceTree = "<group>"; };
 		C3CE66EE2F42B507009EF9A7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		C3CE66FE2F42C572009EF9A7 /* NotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
@@ -135,6 +145,9 @@
 		AA000019 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				C36B6BE32F44CC86000C5DB5 /* MarketplaceUploadAPIForm.swift */,
+				C36B6BE12F44B278000C5DB5 /* MarketplaceUploadView.swift */,
+				C36B6BDF2F44B26C000C5DB5 /* MarketplaceListView.swift */,
 				C384EE082F412AE50044D1BA /* AgriTVView.swift */,
 				AA000004 /* ContentView.swift */,
 				AA000036 /* HomeView.swift */,
@@ -157,6 +170,8 @@
 		AA000020 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				C39B1D4F2F452C9F00C1C31E /* String+HTMLStripped.swift */,
+				C3B503822F44CF80009141FF /* MarketplaceAPIService.swift */,
 				C3CE66FE2F42C572009EF9A7 /* NotificationManager.swift */,
 				AA000010 /* WebViewModel.swift */,
 				AA000032 /* TabViewModel.swift */,
@@ -275,12 +290,16 @@
 				AA000005 /* WebView.swift in Sources */,
 				AA000007 /* SafariView.swift in Sources */,
 				AA000033 /* RefreshableWebView.swift in Sources */,
+				C36B6BE22F44B278000C5DB5 /* MarketplaceUploadView.swift in Sources */,
 				AA000035 /* HomeView.swift in Sources */,
 				AA000037 /* NewsPageView.swift in Sources */,
 				AA000043 /* MagazinesView.swift in Sources */,
 				AA000047 /* BookmarksView.swift in Sources */,
+				C3B503832F44CF80009141FF /* MarketplaceAPIService.swift in Sources */,
 				AA000009 /* WebViewModel.swift in Sources */,
 				AA000039 /* NewsArticle.swift in Sources */,
+				C36B6BE42F44CC86000C5DB5 /* MarketplaceUploadAPIForm.swift in Sources */,
+				C36B6BE02F44B26D000C5DB5 /* MarketplaceListView.swift in Sources */,
 				AA000041 /* NewsService.swift in Sources */,
 				C3CE66FF2F42C572009EF9A7 /* NotificationManager.swift in Sources */,
 				AA000045 /* BookmarkManager.swift in Sources */,
@@ -292,6 +311,7 @@
 				AA000057 /* VideoService.swift in Sources */,
 				AA000059 /* YouTubePlayerView.swift in Sources */,
 				C3CE67002F42C573009EF9A7 /* NotificationSettingsView.swift in Sources */,
+				C39B1D502F452C9F00C1C31E /* String+HTMLStripped.swift in Sources */,
 				AA000061 /* SkeletonLoaders.swift in Sources */,
 				AA000063 /* CategoryService.swift in Sources */,
 				AA000065 /* SideMenuView.swift in Sources */,

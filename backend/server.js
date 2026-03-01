@@ -3,6 +3,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const cors = require('cors');
 const NodeCache = require('node-cache');
+const admin = require('firebase-admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,6 +14,213 @@ const cache = new NodeCache({ stdTTL: 600 });
 // Enable CORS for iOS app
 app.use(cors());
 app.use(express.json());
+
+// ============================================================
+// Firebase Admin SDK Initialization
+// ============================================================
+// Uses GOOGLE_APPLICATION_CREDENTIALS env var (path to service account JSON)
+// or FIREBASE_SERVICE_ACCOUNT env var (JSON string of service account)
+let firebaseInitialized = false;
+try {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+    firebaseInitialized = true;
+    console.log('✅ Firebase Admin SDK initialized from FIREBASE_SERVICE_ACCOUNT env var');
+  } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    admin.initializeApp({
+      credential: admin.credential.applicationDefault(),
+    });
+    firebaseInitialized = true;
+    console.log('✅ Firebase Admin SDK initialized from GOOGLE_APPLICATION_CREDENTIALS');
+  } else {
+    console.warn('⚠️  No Firebase credentials found. Push notifications disabled.');
+    console.warn('   Set FIREBASE_SERVICE_ACCOUNT (JSON string) or GOOGLE_APPLICATION_CREDENTIALS (file path)');
+  }
+} catch (err) {
+  console.error('❌ Firebase Admin SDK initialization failed:', err.message);
+}
+
+// ============================================================
+// Content Tracking for Push Notifications
+// ============================================================
+// Store the last known IDs so we can detect new content
+let lastKnownArticleId = null;
+let lastKnownMagazineId = null;
+
+// Polling interval: check every 5 minutes (300000ms)
+const POLL_INTERVAL = 5 * 60 * 1000;
+
+/**
+ * Send an FCM notification to a topic
+ */
+async function sendTopicNotification(topic, title, body, data = {}) {
+  if (!firebaseInitialized) {
+    console.log(`[FCM] Skipped (Firebase not initialized): ${topic} - ${title}`);
+    return;
+  }
+
+  const message = {
+    topic: topic,
+    notification: {
+      title: title,
+      body: body,
+    },
+    data: {
+      ...data,
+      type: topic,
+    },
+    apns: {
+      payload: {
+        aps: {
+          sound: 'default',
+          badge: 1,
+          'content-available': 1,
+        },
+      },
+    },
+  };
+
+  try {
+    const response = await admin.messaging().send(message);
+    console.log(`[FCM] ✅ Sent to topic "${topic}": ${title} (${response})`);
+  } catch (err) {
+    console.error(`[FCM] ❌ Failed to send to topic "${topic}":`, err.message);
+  }
+}
+
+/**
+ * Check WordPress for new articles and send push if found
+ */
+async function checkForNewArticles() {
+  try {
+    const response = await axios.get('https://agribusinessmedia.com/wp-json/wp/v2/posts', {
+      params: { per_page: 1, _embed: true },
+      headers: {
+        'User-Agent': 'AgribusinessNewsApp-Backend/1.0',
+      },
+    });
+
+    if (!response.data || response.data.length === 0) return;
+
+    const latestPost = response.data[0];
+    const latestId = latestPost.id;
+
+    if (lastKnownArticleId === null) {
+      // First run — just record the ID, don't send notification
+      lastKnownArticleId = latestId;
+      console.log(`[Poll] Initialized lastKnownArticleId = ${latestId}`);
+      return;
+    }
+
+    if (latestId > lastKnownArticleId) {
+      // New article detected!
+      const title = latestPost.title.rendered
+        .replace(/<[^>]*>/g, '')
+        .replace(/&#8211;/g, '–')
+        .replace(/&#8217;/g, "'")
+        .replace(/&#8220;/g, '"')
+        .replace(/&#8221;/g, '"')
+        .replace(/&amp;/g, '&');
+
+      let category = 'News';
+      if (latestPost._embedded && latestPost._embedded['wp:term']) {
+        const categories = latestPost._embedded['wp:term'][0];
+        if (categories && categories.length > 0) {
+          category = categories[0].name || 'News';
+        }
+      }
+
+      console.log(`[Poll] 🆕 New article detected: "${title}" (id: ${latestId})`);
+      await sendTopicNotification(
+        'new_articles',
+        '📰 New Article',
+        title,
+        { articleId: String(latestId), category }
+      );
+
+      lastKnownArticleId = latestId;
+    }
+  } catch (err) {
+    console.error('[Poll] Error checking articles:', err.message);
+  }
+}
+
+/**
+ * Check WordPress media for new magazines and send push if found
+ */
+async function checkForNewMagazines() {
+  try {
+    const response = await axios.get('https://agribusinessmedia.com/wp-json/wp/v2/media', {
+      params: {
+        media_type: 'application',
+        per_page: 1,
+        orderby: 'date',
+        order: 'desc',
+      },
+      headers: {
+        'User-Agent': 'AgribusinessNewsApp-Backend/1.0',
+      },
+    });
+
+    if (!response.data || response.data.length === 0) return;
+
+    const latestMedia = response.data[0];
+    const latestId = latestMedia.id;
+    const title = (latestMedia.title?.rendered || '').toUpperCase();
+
+    // Only consider items with "ISSUE" in the title
+    if (!title.includes('ISSUE')) return;
+
+    if (lastKnownMagazineId === null) {
+      lastKnownMagazineId = latestId;
+      console.log(`[Poll] Initialized lastKnownMagazineId = ${latestId}`);
+      return;
+    }
+
+    if (latestId > lastKnownMagazineId) {
+      const cleanTitle = (latestMedia.title?.rendered || 'New Issue')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&#8211;/g, '–')
+        .replace(/&#8217;/g, "'");
+
+      // Extract issue number
+      const issueMatch = title.match(/ISSUE[\s-]*(\d+)/);
+      const issueNumber = issueMatch ? `Issue ${issueMatch[1]}` : 'New Issue';
+
+      console.log(`[Poll] 🆕 New magazine detected: "${cleanTitle}" (id: ${latestId})`);
+      await sendTopicNotification(
+        'new_magazines',
+        '📖 New Magazine Available',
+        `${issueNumber} is now available to read!`,
+        { magazineId: String(latestId) }
+      );
+
+      lastKnownMagazineId = latestId;
+    }
+  } catch (err) {
+    console.error('[Poll] Error checking magazines:', err.message);
+  }
+}
+
+/**
+ * Run all content checks
+ */
+async function pollForNewContent() {
+  console.log(`[Poll] Checking for new content at ${new Date().toISOString()}`);
+  await Promise.all([
+    checkForNewArticles(),
+    checkForNewMagazines(),
+  ]);
+}
+
+// Start polling when server starts
+pollForNewContent(); // initial check (records baseline IDs)
+setInterval(pollForNewContent, POLL_INTERVAL);
+console.log(`🔄 Content polling started (every ${POLL_INTERVAL / 1000}s)`);
+
 
 // Health check endpoint
 app.get('/', (req, res) => {
@@ -144,7 +352,34 @@ app.post('/api/cache/clear', (req, res) => {
   res.json({ success: true, message: 'Cache cleared' });
 });
 
+// Manually trigger a content check & send notifications for any new content
+app.post('/api/notifications/check', async (req, res) => {
+  try {
+    await pollForNewContent();
+    res.json({
+      success: true,
+      message: 'Content check completed',
+      lastKnownArticleId,
+      lastKnownMagazineId,
+      firebaseInitialized,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Get notification status
+app.get('/api/notifications/status', (req, res) => {
+  res.json({
+    firebaseInitialized,
+    pollIntervalSeconds: POLL_INTERVAL / 1000,
+    lastKnownArticleId,
+    lastKnownMagazineId,
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Agribusiness News API running on http://localhost:${PORT}`);
   console.log(`📰 News endpoint: http://localhost:${PORT}/api/news`);
+  console.log(`🔔 Notification status: http://localhost:${PORT}/api/notifications/status`);
 });

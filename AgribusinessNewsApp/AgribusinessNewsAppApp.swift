@@ -15,6 +15,7 @@ import FirebaseMessaging
 struct AgribusinessNewsAppApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var notificationManager = NotificationManager.shared
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some Scene {
         WindowGroup {
@@ -26,11 +27,29 @@ struct AgribusinessNewsAppApp: App {
                     notificationManager.clearBadge()
                 }
         }
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .background:
+                // Schedule background content check when app moves to background
+                appDelegate.scheduleContentCheckTask()
+            case .active:
+                // Check for new content when app becomes active
+                notificationManager.clearBadge()
+                Task {
+                    await notificationManager.checkForNewContent()
+                }
+            default:
+                break
+            }
+        }
     }
     
     private func setupNotifications() {
         // Request notification permission on first launch
         notificationManager.requestAuthorization()
+        
+        // Schedule the first background content check
+        appDelegate.scheduleContentCheckTask()
         
         // Initialize last seen content IDs on first launch
         // This prevents notifications for existing content
@@ -94,6 +113,20 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate {
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("Failed to register for remote notifications: \(error.localizedDescription)")
+    }
+    
+    // Handle incoming remote notifications (including silent pushes with content-available)
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        print("Received remote notification: \(userInfo)")
+        
+        // Let Firebase handle the message
+        Messaging.messaging().appDidReceiveMessage(userInfo)
+        
+        // Also trigger a local content check to update last seen IDs
+        Task {
+            await NotificationManager.shared.checkForNewContent()
+            completionHandler(.newData)
+        }
     }
     
     // MARK: - Firebase Messaging Delegate
@@ -193,10 +226,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate {
             await checkTask.value
             task.setTaskCompleted(success: true)
         }
-    }
-    
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        scheduleContentCheckTask()
     }
 }
 

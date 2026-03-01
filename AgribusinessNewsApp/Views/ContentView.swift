@@ -5,6 +5,7 @@
 //  Created on 29 November 2025.
 //
 
+
 import SwiftUI
 
 struct ContentView: View {
@@ -30,7 +31,7 @@ struct ContentView: View {
                 }
             }
             .tag(0)
-            
+
             NavigationView {
                 NewsPageView(webViewModel: tabViewModel.newsWebViewModel)
                     .navigationBarHidden(true)
@@ -43,7 +44,7 @@ struct ContentView: View {
                 }
             }
             .tag(1)
-            
+
             MagazinesView()
             .tabItem {
                 VStack {
@@ -52,7 +53,7 @@ struct ContentView: View {
                 }
             }
             .tag(2)
-            
+
             AgriTVView()
             .tabItem {
                 VStack {
@@ -61,6 +62,19 @@ struct ContentView: View {
                 }
             }
             .tag(3)
+
+            // Marketplace Tab
+            NavigationView {
+                MarketplaceListView()
+            }
+            .navigationViewStyle(.stack)
+            .tabItem {
+                VStack {
+                    Image(systemName: "cart.fill")
+                    Text("Marketplace")
+                }
+            }
+            .tag(4)
         }
         .accentColor(.green)
         .onChange(of: selectedTab) { oldValue, newValue in

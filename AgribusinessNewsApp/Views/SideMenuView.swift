@@ -7,6 +7,19 @@
 
 import SwiftUI
 
+// Simple skeleton shape for loading states
+struct SimpleSkeletonShape: View {
+    var height: CGFloat = 20
+    var width: CGFloat? = nil
+    var cornerRadius: CGFloat = 4
+    
+    var body: some View {
+        RoundedRectangle(cornerRadius: cornerRadius)
+            .fill(Color.gray.opacity(0.2))
+            .frame(width: width, height: height)
+    }
+}
+
 struct SideMenuView: View {
     @Binding var isPresented: Bool
     @Binding var selectedCategory: ArticleCategory?
@@ -98,8 +111,8 @@ struct SideMenuView: View {
                         VStack(spacing: 12) {
                             ForEach(0..<8, id: \.self) { _ in
                                 HStack(spacing: 12) {
-                                    SkeletonShape(height: 28, width: 28, cornerRadius: 6)
-                                    SkeletonShape(height: 18, width: 120)
+                                    SimpleSkeletonShape(height: 28, width: 28, cornerRadius: 6)
+                                    SimpleSkeletonShape(height: 18, width: 120)
                                     Spacer()
                                 }
                                 .padding(.horizontal, 20)
@@ -127,10 +140,10 @@ struct SideMenuView: View {
                                         .padding(.leading, 60)
                                 }
                             }
+                            .padding(.bottom, 20) // Add padding at bottom
                         }
+                        .frame(maxHeight: .infinity) // Allow ScrollView to take full available height
                     }
-                    
-                    Spacer()
                     
                     // Notification Settings Button
                     Divider()
@@ -185,7 +198,7 @@ struct SideMenuView: View {
                     }
                     .padding(.bottom, 30)
                 }
-                .frame(width: 280)
+                .frame(maxWidth: 280, maxHeight: .infinity)
                 .background(Color(.systemBackground))
                 
                 Spacer()

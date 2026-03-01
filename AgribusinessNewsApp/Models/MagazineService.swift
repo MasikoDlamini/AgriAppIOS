@@ -111,7 +111,7 @@ class MagazineService: ObservableObject {
         }
         
         // Extract month and year
-        var monthYear = "Recent"
+        var monthYear = ""
         let months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
                      "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER",
                      "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]

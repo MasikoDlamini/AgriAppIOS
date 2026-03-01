@@ -217,6 +217,7 @@ struct MagazineCoverViewDynamic: View {
                 Text(magazine.displayTitle)
                     .font(.headline)
                     .foregroundColor(.primary)
+                    .lineLimit(1)
                 
                 HStack(spacing: 4) {
                     Image(systemName: "arrow.right.circle.fill")
