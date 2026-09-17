@@ -124,7 +124,7 @@ struct MarketplaceUploadView: View {
         let loginString = "\(username):\(appPassword)"
         let loginData = loginString.data(using: .utf8)!
         let base64Login = loginData.base64EncodedString()
-        let url = URL(string: "https://agribusinessmedia.com/wp-json/wp/v2/media")!
+        let url = URL(string: "https://agrib.10web.cloud/wp-json/wp/v2/media")!
         var ids: [Int] = []
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 120
@@ -155,7 +155,7 @@ struct MarketplaceUploadView: View {
     }
 
     func submitListingWithImageIDs(_ imageIDs: [Int]) async throws {
-        let url = URL(string: "https://agribusinessmedia.com/wp-json/wp/v2/marketplace_listing")!
+        let url = URL(string: "https://agrib.10web.cloud/wp-json/wp/v2/marketplace_listing")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
